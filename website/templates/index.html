@@ -1,0 +1,192 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Line Chart</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+    <script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-compat/3.0.0-alpha1/jquery.min.js"></script>
+    <script src="https://moment.github.io/luxon/global/luxon.min.js"></script>
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
+
+</head>
+
+<body>
+    <div style="border: 1px dashed #d9d9d9; padding-bottom: 10px">
+        <div style="width:75%; margin: 0 auto">
+            <canvas id="canvas"></canvas>
+        </div>
+        <section style="margin: 0 auto; margin-top: 14px; width: 75%; text-align: center">
+            <form id="get-data" data-chart="canvas">
+                <input name="start-date-1" id="start-date-1" autocomplete="off" class="input_form" />
+                <input name="end-date-1" id="end-date-1" autocomplete="off" class="input_form" />
+                <select name="select-1" id="select-1">
+                    <option value="clase_caida_ocupante" selected>Caida de Ocupante</option>
+                    <option value="clase_otro">Otro</option>
+                    <option value="clase_volcamiento">Volcamiento</option>
+                    <option value="clase_choque">Choque</option>
+                    <option value="clase_atropello">Atropello</option>
+                </select>
+                <button type="submit" class="submit_button">Compute Availability</button>
+            </form>
+        </section>
+    </div>
+    <div style="border: 1px dashed #d9d9d9; padding-bottom: 10px">
+        <div style="width:75%; margin: 0 auto">
+            <canvas id="canvas-2"></canvas>
+        </div>
+        <section style="margin: 0 auto; margin-top: 14px; width: 75%; text-align: center">
+            <form id="get-data-2" data-chart="canvas-2">
+                <input name="start-date-2" id="start-date-2" autocomplete="off" class="input_form" />
+                <input name="end-date-2" id="end-date-2" autocomplete="off" class="input_form" />
+                <select name="select-2" id="select-2">
+                    <option value="clase_caida_ocupante" selected>Caida de Ocupante</option>
+                    <option value="clase_otro">Otro</option>
+                    <option value="clase_volcamiento">Volcamiento</option>
+                    <option value="clase_choque">Choque</option>
+                    <option value="clase_atropello">Atropello</option>
+                </select>
+                <button type="submit" class="submit_button">Compute Availability</button>
+            </form>
+        </section>
+    </div>
+    <script>
+        var $start_date;
+        var $end_date;
+
+        var start_date_picker = new Pikaday({
+            field: document.getElementById('start-date-1'),
+            position: 'top',
+            reposition: false,
+            format: 'MMM D YYYY',
+            toString(date, format) {
+                const day = date.getDate();
+                const month = date.getMonth() + 1;
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+        });
+
+        var end_date_picker = new Pikaday({
+            field: document.getElementById('end-date-1'),
+            position: 'top',
+            reposition: false,
+            format: 'D MMM YYYY',
+            toString(date, format) {
+                const day = date.getDate();
+                const month = date.getMonth() + 1;
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+        });
+
+        var start_date_picker = new Pikaday({
+            field: document.getElementById('start-date-2'),
+            position: 'top',
+            reposition: false,
+            format: 'MMM D YYYY',
+            toString(date, format) {
+                const day = date.getDate();
+                const month = date.getMonth() + 1;
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+        });
+
+        var end_date_picker = new Pikaday({
+            field: document.getElementById('end-date-2'),
+            position: 'top',
+            reposition: false,
+            format: 'D MMM YYYY',
+            toString(date, format) {
+                const day = date.getDate();
+                const month = date.getMonth() + 1;
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+        });
+
+        function createChart(id, config) {
+            var ctx = document.getElementById(id).getContext('2d');
+            return new Chart(ctx, config);
+        };
+
+        var lineConfig = {
+            type: 'line',
+            data: {
+            },
+            options: {
+                scales: {
+                    'xAxes': [{
+                        'type': 'time',
+                        'distribution': 'series',
+                        'ticks': { 'source': 'data', 'autoSkip': true }
+                    }],
+                    'yAxes': [{ 'display': true, scaleLabel: { display: true, labelString: 'Value' } }]
+                },
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Chart.js Line Chart'
+                },
+                tooltips: {
+                    mode: 'index',
+                    intersect: false,
+                },
+            }
+        };
+        const lineChart = createChart('canvas', lineConfig);
+        const lineChart2 = createChart('canvas-2', lineConfig);
+
+        async function fetchHistorical(startDate, endDate, accidentType) {
+            let params = new URLSearchParams();
+            params.set('startDate', startDate);
+            params.set('endDate', endDate);
+            params.set('accidentType', accidentType);
+            let response = await fetch('http://127.0.0.1:5000/historical?' + params.toString());
+            return response.json();
+        }
+        $("form").on("submit", async function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            // Obtener formulario
+            // => ev.target
+            // Obtener chart id relacionada al formulario
+            // => ev.target.dataset.chart
+            // luxon.DateTime.fromString("9/8/2019", "d/M/yyyy").ts
+            var start_ts = "";
+            var end_ts;
+            var acc_type;
+            if (ev.target.dataset.chart == "canvas-2") {
+                let start_value = $("#start-date-2").val()
+                let end_value = $("#end-date-2").val()
+                start_ts = luxon.DateTime.fromString(start_value, "d/M/yyyy").ts
+                end_ts = luxon.DateTime.fromString(end_value, "d/M/yyyy").ts
+                acc_type = $('#select-2 option:selected').val()
+                const data = await fetchHistorical(start_ts, end_ts, acc_type);
+                lineChart2.data.datasets = data;
+                lineChart2.update();
+            } else {
+                let start_value = $("#start-date-1").val()
+                let end_value = $("#end-date-1").val()
+                start_ts = luxon.DateTime.fromString(start_value, "d/M/yyyy").ts
+                end_ts = luxon.DateTime.fromString(end_value, "d/M/yyyy").ts
+                acc_type = $('#select-1 option:selected').val()
+                const data = await fetchHistorical(start_ts, end_ts, acc_type);
+                lineChart.data.datasets = data;
+                lineChart.update();
+            }
+        });
+    </script>
+</body>
+
+</html>
