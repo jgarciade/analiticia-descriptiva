@@ -17,3 +17,8 @@ export FLASK_APP=analitica.py
 $ cd website
 $ python analitica.py
 ```
+# RESUME
+
+**Please find ALL the steps followed below**
+- https://github.com/jgarciade/analiticia-descriptiva/blob/master/Data%20Analysis.ipynb
+- https://github.com/jgarciade/analiticia-descriptiva/blob/master/Model%20Training.ipynb
