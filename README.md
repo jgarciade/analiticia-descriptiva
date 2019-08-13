@@ -25,6 +25,6 @@ $ python analitica.py
 
 # Videos
 **Setup**  
-https://youtu.be/OVke8hb_t3U
+https://youtu.be/OVke8hb_t3U  
 **Web App**  
-https://youtu.be/tu_Nej4LBgs
+https://youtu.be/tu_Nej4LBgs  
