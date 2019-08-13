@@ -22,3 +22,9 @@ $ python analitica.py
 **Please find ALL the steps followed below**
 - https://github.com/jgarciade/analiticia-descriptiva/blob/master/Data%20Analysis.ipynb
 - https://github.com/jgarciade/analiticia-descriptiva/blob/master/Model%20Training.ipynb
+
+# Videos
+**Setup**  
+https://youtu.be/OVke8hb_t3U
+**Web App**  
+https://youtu.be/tu_Nej4LBgs
