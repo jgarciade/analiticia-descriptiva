@@ -3,19 +3,17 @@
 # Installation
 
 1. Install the requirements to run the app
-
-> ```bash
+```bash
 pip install -r requirements.pip
 ```
-
 2. Export the entry point
->```bash
+```bash
 export FLASK_APP=analitica.py
 ```
 
 3. Go to the website folder and run the app
 
->```bash
+```bash
 $ cd website
 $ python analitica.py
 ```
