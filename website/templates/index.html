@@ -15,6 +15,14 @@
             -webkit-user-select: none;
             -ms-user-select: none;
         }
+
+        .date-input {
+            width: 80px;
+        }
+
+        input {
+            margin: 10px;
+        }
     </style>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
 
@@ -25,10 +33,12 @@
         <div style="width:75%; margin: 0 auto">
             <canvas id="canvas"></canvas>
         </div>
-        <section style="margin: 0 auto; margin-top: 14px; width: 75%; text-align: center">
+        <section style="margin: 0 auto; margin-top: 14px; width: 70%; text-align: center">
             <form id="get-data" data-chart="canvas">
-                <input name="start-date-1" id="start-date-1" autocomplete="off" class="input_form" />
-                <input name="end-date-1" id="end-date-1" autocomplete="off" class="input_form" />
+                <input name="start-date-1" id="start-date-1" autocomplete="off" class="date-input"
+                    placeholder="Fecha inicial" />
+                <input name="end-date-1" id="end-date-1" autocomplete="off" class="date-input"
+                    placeholder="Fecha final" />
                 <select name="select-1" id="select-1">
                     <option value="clase_caida_ocupante" selected>Caida de Ocupante</option>
                     <option value="clase_otro">Otro</option>
@@ -36,7 +46,8 @@
                     <option value="clase_choque">Choque</option>
                     <option value="clase_atropello">Atropello</option>
                 </select>
-                <button type="submit" class="submit_button">Compute Availability</button>
+                <label><input type="checkbox" id="cbox1" value="month">Mensual</label>
+                <button type="submit" class="submit_button">Obtener</button>
             </form>
         </section>
     </div>
@@ -44,10 +55,12 @@
         <div style="width:75%; margin: 0 auto">
             <canvas id="canvas-2"></canvas>
         </div>
-        <section style="margin: 0 auto; margin-top: 14px; width: 75%; text-align: center">
+        <section style="margin: 0 auto; margin-top: 14px; width: 50%; text-align: center">
             <form id="get-data-2" data-chart="canvas-2">
-                <input name="start-date-2" id="start-date-2" autocomplete="off" class="input_form" />
-                <input name="end-date-2" id="end-date-2" autocomplete="off" class="input_form" />
+                <input class="date-input" name="start-date-2" id="start-date-2" autocomplete="off"
+                    placeholder="Fecha inicial" />
+                <input class="date-input" date-input="date-input" name="end-date-2" id="end-date-2" autocomplete="off"
+                    placeholder="Fecha final" />
                 <select name="select-2" id="select-2">
                     <option value="clase_caida_ocupante" selected>Caida de Ocupante</option>
                     <option value="clase_otro">Otro</option>
@@ -55,7 +68,8 @@
                     <option value="clase_choque">Choque</option>
                     <option value="clase_atropello">Atropello</option>
                 </select>
-                <button type="submit" class="submit_button">Compute Availability</button>
+                <!-- <label><input type="checkbox" id="cbox2" value="month">Mensual</label> -->
+                <button type="submit" class="submit_button">Predecir</button>
             </form>
         </section>
     </div>
@@ -128,15 +142,17 @@
                 scales: {
                     'xAxes': [{
                         'type': 'time',
-                        'distribution': 'series',
-                        'ticks': { 'source': 'data', 'autoSkip': true }
+                        'distribution': 'linear',
+                        'ticks': { 'source': 'data', 'autoSkip': true },
+                        'scaleLabel': { display: true, labelString: 'Fecha' },
+                        time: { unit: 'day' }
                     }],
-                    'yAxes': [{ 'display': true, scaleLabel: { display: true, labelString: 'Value' } }]
+                    'yAxes': [{ 'display': true, scaleLabel: { display: true, labelString: 'Total Accidentes' } }]
                 },
                 responsive: true,
                 title: {
                     display: true,
-                    text: 'Chart.js Line Chart'
+                    text: 'Historico por tipo de accidente'
                 },
                 tooltips: {
                     mode: 'index',
@@ -144,17 +160,56 @@
                 },
             }
         };
-        const lineChart = createChart('canvas', lineConfig);
-        const lineChart2 = createChart('canvas-2', lineConfig);
 
-        async function fetchHistorical(startDate, endDate, accidentType) {
+        var lineConfig2 = {
+            type: 'line',
+            data: {
+            },
+            options: {
+                scales: {
+                    'xAxes': [{
+                        'type': 'time',
+                        'distribution': 'linear',
+                        'ticks': { 'source': 'data', 'autoSkip': true },
+                        'scaleLabel': { display: true, labelString: 'Fecha' },
+                        time: { unit: 'day' }
+                    }],
+                    'yAxes': [{ 'display': true, scaleLabel: { display: true, labelString: 'Total Accidentes' } }]
+                },
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Prediccion por tipo de accidente'
+                },
+                tooltips: {
+                    mode: 'index',
+                    intersect: false,
+                },
+            }
+        };
+
+        const lineChart = createChart('canvas', lineConfig);
+        const lineChart2 = createChart('canvas-2', lineConfig2);
+
+        async function fetchHistorical(startDate, endDate, accidentType, monthly) {
             let params = new URLSearchParams();
             params.set('startDate', startDate);
             params.set('endDate', endDate);
             params.set('accidentType', accidentType);
+            params.set('monthly', monthly);
             let response = await fetch('http://127.0.0.1:5000/historical?' + params.toString());
             return response.json();
         }
+
+        async function fetchPredict(startDate, endDate, accidentType) {
+            let params = new URLSearchParams();
+            params.set('startDate', startDate);
+            params.set('endDate', endDate);
+            params.set('accidentType', accidentType);
+            let response = await fetch('http://127.0.0.1:5000/predict?' + params.toString());
+            return response.json();
+        }
+
         $("form").on("submit", async function (ev) {
             ev.preventDefault();
             ev.stopPropagation();
@@ -167,21 +222,22 @@
             var end_ts;
             var acc_type;
             if (ev.target.dataset.chart == "canvas-2") {
-                let start_value = $("#start-date-2").val()
-                let end_value = $("#end-date-2").val()
+                let start_value = $("#start-date-2").val();
+                let end_value = $("#end-date-2").val();
                 start_ts = luxon.DateTime.fromString(start_value, "d/M/yyyy").ts
                 end_ts = luxon.DateTime.fromString(end_value, "d/M/yyyy").ts
                 acc_type = $('#select-2 option:selected').val()
-                const data = await fetchHistorical(start_ts, end_ts, acc_type);
+                const data = await fetchPredict(start_ts, end_ts, acc_type);
                 lineChart2.data.datasets = data;
                 lineChart2.update();
             } else {
-                let start_value = $("#start-date-1").val()
-                let end_value = $("#end-date-1").val()
+                let start_value = $("#start-date-1").val();
+                let end_value = $("#end-date-1").val();
+                let monthly = $("#cbox1").prop('checked');
                 start_ts = luxon.DateTime.fromString(start_value, "d/M/yyyy").ts
                 end_ts = luxon.DateTime.fromString(end_value, "d/M/yyyy").ts
                 acc_type = $('#select-1 option:selected').val()
-                const data = await fetchHistorical(start_ts, end_ts, acc_type);
+                const data = await fetchHistorical(start_ts, end_ts, acc_type, monthly);
                 lineChart.data.datasets = data;
                 lineChart.update();
             }
